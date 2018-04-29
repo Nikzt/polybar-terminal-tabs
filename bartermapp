@@ -1,0 +1,32 @@
+#!/bin/bash
+
+
+# Usage:
+#   bartermapp [arg1] [arg2]
+#      arg1: terminal program to run
+#      arg2: number of times do apply additional 
+#            x offset defined by xinterval
+
+# Dependencies:
+#   tdrop
+
+
+xoffset=0
+xinterval=0
+yoffset=138
+width=601
+height=600
+terminal=stna
+
+
+x=$(expr $xoffset + $xinterval \* $2 - $xinterval)
+
+tdrop -a -w $width -h $height -x $x -y $yoffset -n $2 -f "-c stna -e bash -c 'bspc node -g sticky && $1'" $terminal &>/dev/null 
+
+tval=$(~/wm/scripts/taskbar/control-tab.sh $2)
+
+if [ $tval == 0 ]; then
+	echo "%{F#666 B#1e1e20} $2%{F- B-}%{B#1e1e20} $3 %{B-}"
+else
+	echo "%{F#666 B#2f2f34} $2%{F- B-}%{B#2f2f34} $3 %{B-}"
+fi

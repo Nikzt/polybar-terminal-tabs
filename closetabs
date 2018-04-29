@@ -1,0 +1,35 @@
+#!/bin/bash
+
+opentab=$1
+
+tnum=1
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook ranger 1 
+fi
+tnum=2
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook calcurse 1 
+fi
+tnum=3
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook notes 1 
+fi
+tnum=4
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook timer 1 
+fi
+tnum=5
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook email 1 
+fi
+tnum=6
+open=$(awk -v lnum="$tnum" 'NR==lnum{ print $1 }' /dev/shm/polybar-tabs)
+if [[ $tnum != $opentab && $open == 1 ]]; then
+	polybar-msg hook htop 1 
+fi
+
