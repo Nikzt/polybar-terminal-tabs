@@ -10,16 +10,14 @@ function show_help {
 }
 
 function toggle_tab {
-
-	echo $tab_num
-	term_app=${tabs[$tab_num]}
-	icon=${tab_icons[$tab_num]}
+	tab_index=$(expr $tab_num - 1)
+	term_app=${tabs[$tab_index]}
+	icon=${tab_icons[$tab_index]}
 	x=$xoffset
 	
-	tdrop -a -w $width -h $height -x $x -y $yoffset -n $tab_num -f "-c $terminal -e bash -c 'bspc node -g sticky && $term_app'" $terminal &>/dev/null &
+	tdrop -a -w $width -h $height -x $x -y $yoffset -n $tab_num -f "-c $terminal -e bash -c 'bspc node -g sticky && $term_app'" $terminal &>/dev/null
 	
 	tval=$(update_tab_status)
-	echo $tval
 	if [ $tval == 0 ]; then
 		echo "%{F#666 B#1e1e20} $tab_num%{F- B-}%{B#1e1e20} $icon %{B-}"
 	else
@@ -28,8 +26,7 @@ function toggle_tab {
 }
 
 function update_tab_status {
-	linenum=$(expr $tab_num + 1)
-	tabval=$(awk -v lnum="$linenum" 'NR==lnum{ print $linenum }' /dev/shm/polybar-tabs)
+	tabval=$(awk -v lnum="$tab_num" 'NR==lnum{ print $tab_num }' /dev/shm/polybar-tabs)
 	
 	if [ $tabval == 0 ]; then
 		sed -i "${linenum}s/./1/" /dev/shm/polybar-tabs
@@ -43,7 +40,23 @@ function update_tab_status {
 }
 
 function init_tab {
-	printf "0\n0\n0\n0\n0\n0\n" > /dev/shm/polybar-tabs
+	printf "0\n" > /dev/shm/polybar-tabs
+	for i in `seq 2 $num_tabs`; 
+	do
+		printf "0\n" >> /dev/shm/polybar-tabs
+	done
+}
+
+function close_tabs {
+	num_tabs=$(wc -l < /dev/shm/polybar-tabs)
+	for i in `seq 1 $num_tabs`;
+	do
+		isopen=$(awk -v lnum="$i" 'NR==lnum{ print $i }' /dev/shm/polybar-tabs)
+		echo $isopen
+		if [[ $i != $tab_num && $isopen == 1 ]]; then
+			echo $i
+		fi
+	done
 }
 
 # A POSIX variable
@@ -53,16 +66,18 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 output_file=""
 verbose=0
 
-while getopts "h?t:i" opt; do
+while getopts "h?t:i:" opt; do
     case "$opt" in
     h|\?)
         show_help
         exit 0
         ;;
-    t)  tab_num=$OPTARG
+    t)  tab_num=$OPTARG 
 	toggle_tab
+	close_tabs
         ;;
-    i)  init_tab
+    i)  num_tabs=$OPTARG
+	init_tab
         ;;
     esac
 done
@@ -71,4 +86,3 @@ shift $((OPTIND-1))
 
 [ "$1" = "--" ] && shift
 
-echo $tab_num
