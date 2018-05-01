@@ -29,10 +29,10 @@ function update_tab_status {
 	tabval=$(awk -v lnum="$tab_num" 'NR==lnum{ print $tab_num }' /dev/shm/polybar-tabs)
 	
 	if [ $tabval == 0 ]; then
-		sed -i "${linenum}s/./1/" /dev/shm/polybar-tabs
+		sed -i "${tab_num}s/./1/" /dev/shm/polybar-tabs
 		tabval=1
 	else
-		sed -i "${linenum}s/./0/" /dev/shm/polybar-tabs
+		sed -i "${tab_num}s/./0/" /dev/shm/polybar-tabs
 		tabval=0
 	fi
 	echo $tabval
@@ -49,12 +49,15 @@ function init_tab {
 
 function close_tabs {
 	num_tabs=$(wc -l < /dev/shm/polybar-tabs)
+	og_tab_num=$tab_num
 	for i in `seq 1 $num_tabs`;
 	do
 		isopen=$(awk -v lnum="$i" 'NR==lnum{ print $i }' /dev/shm/polybar-tabs)
-		echo $isopen
 		if [[ $i != $tab_num && $isopen == 1 ]]; then
-			echo $i
+			tab_num=$i
+			toggle_tab
+			tab_num=$og_tab_num
+			
 		fi
 	done
 }
