@@ -1,7 +1,6 @@
-
 #!/bin/bash
 
-. tabs.conf
+. ~/.config/tabs.conf
 
 function show_help {
 	echo Usage:
@@ -19,9 +18,9 @@ function toggle_tab {
 	
 	tval=$(update_tab_status)
 	if [ $tval == 0 ]; then
-		echo "%{F#666 B#1e1e20} $tab_num%{F- B-}%{B#1e1e20} $icon %{B-}"
+		echo "%{F#666 B#1e1e20} $tab_num%{F- B-}%{B$t_closed_col} $icon %{B-}"
 	else
-		echo "%{F#666 B#2f2f34} $tab_num%{F- B-}%{B#2f2f34} $icon %{B-}"
+		echo "%{F#666 B#2f2f34} $tab_num%{F- B-}%{B$t_open_col} $icon %{B-}"
 	fi
 }
 
