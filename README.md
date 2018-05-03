@@ -1,5 +1,7 @@
 # PTTabs
 
+![](example.png)
+
 **Polybar Terminal Tabs:** Some scripts to allow multiple drop-down terminals to be managed with polybar in a tab-like manner.
 
 ## Dependencies
