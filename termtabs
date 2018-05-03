@@ -2,6 +2,7 @@
 
 . ~/.config/tabs.conf
 
+
 function show_help {
 	echo Usage:
 	echo "  -t [TAB NUMBER]  ->  toggle tab defined by [TAB NUMBER] in config file"
@@ -9,18 +10,17 @@ function show_help {
 }
 
 function toggle_tab {
-	tab_index=$(expr $tab_num - 1)
-	term_app=${tabs[$tab_index]}
-	icon=${tab_icons[$tab_index]}
+	term_app=${tabs[$tab_num,app]}
+	icon=${tabs[$tab_num,icon]}
 	x=$xoffset
 	
 	tdrop -a -w $width -h $height -x $x -y $yoffset -n $tab_num -f "-c $terminal -e bash -c 'bspc node -g sticky && $term_app'" $terminal &>/dev/null
 	
 	tval=$(update_tab_status)
 	if [ $tval == 0 ]; then
-		echo "%{F#666 B#1e1e20} $tab_num%{F- B-}%{B$t_closed_col} $icon %{B-}"
+		echo "%{F#666 B$t_closed_col} $tab_num%{F- B-}%{B$t_closed_col} $icon %{B-}"
 	else
-		echo "%{F#666 B#2f2f34} $tab_num%{F- B-}%{B$t_open_col} $icon %{B-}"
+		echo "%{F#666 B$t_open_col} $tab_num%{F- B-}%{B$t_open_col} $icon %{B-}"
 	fi
 }
 
@@ -53,13 +53,28 @@ function close_tabs {
 	do
 		isopen=$(awk -v lnum="$i" 'NR==lnum{ print $i }' /dev/shm/polybar-tabs)
 		if [[ $i != $tab_num && $isopen == 1 ]]; then
-			tab_num=$i
-			toggle_tab
-			tab_num=$og_tab_num
+			polybar-msg hook "tab$i" 3 &> /dev/null
 			
 		fi
 	done
 }
+
+function generate_pbar_config {
+	num_tabs=$(wc -l < /dev/shm/polybar-tabs)
+	printf "! Polybar Terminal Tabs modules\n! Paste these into your polybar config\n\n" > pttabs_modules
+	for i in `seq 1 $num_tabs`;
+	do
+		icon=${tabs[$i,icon]}
+		init="%%{F#666 B$t_closed_col} $i%%{F- B-}%%{B$t_closed_col} $icon%%{B-}"
+		printf "[module/tab$i]\ntype = custom/ipc\n" >> pttabs_modules	
+		printf "hook-0 = termtabs -t $i\n" >> pttabs_modules	
+		printf "hook-1 = echo \"$init\"\n" >> pttabs_modules
+		printf "hook-2 = termtabs -c 5\n" >> pttabs_modules
+		printf "click-left = polybar-msg hook tab5 1\n" >> pttabs_modules
+		printf "initial = 2\n\n" >> pttabs_modules
+	done
+}
+
 
 # A POSIX variable
 OPTIND=1         # Reset in case getopts has been used previously in the shell.
@@ -68,7 +83,7 @@ OPTIND=1         # Reset in case getopts has been used previously in the shell.
 output_file=""
 verbose=0
 
-while getopts "h?t:i:" opt; do
+while getopts "h?t:c:i:g" opt; do
     case "$opt" in
     h|\?)
         show_help
@@ -78,9 +93,14 @@ while getopts "h?t:i:" opt; do
 	toggle_tab
 	close_tabs
         ;;
+    c)  tab_num=$OPTARG
+	toggle_tab
+	;;
     i)  num_tabs=$OPTARG
 	init_tab
         ;;
+    g)  generate_pbar_config
+	;;
     esac
 done
 
