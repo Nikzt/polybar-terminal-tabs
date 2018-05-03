@@ -26,6 +26,8 @@ After configuring `tabs.conf`, run the command `termtabs -g` to generate a text 
 modules-left: tab1 tab2 tab3 tab4 tab5 tab6
 ```
 
+Finally, make sure to run `termtabs -i` to initialize the file which keeps track of which tabs are opened/closed. This must be run on startup, so make sure to put it into your preferred startup script.
+
 ## Polybar Configuration Requirements
 
 The modules that control the tabs require ipc to be enabled in polybar, which can be done with:
@@ -60,3 +62,5 @@ super + F5
 super + F6
 	polybar-msg hook tab6 1 
 ```
+
+
